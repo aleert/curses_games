@@ -83,6 +83,9 @@ def get_frame_size(text: str) -> Tuple[int, int]:
 
      Return pair (rows number, colums number).
      """
+def get_frame_size(text):
+    """Calculate size of multiline text fragment. Returns pair (rows number, colums number)"""
+
     lines = text.splitlines()
     rows = len(lines)
     columns = max([len(line) for line in lines])
