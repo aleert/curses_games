@@ -83,9 +83,6 @@ def get_frame_size(text: str) -> Tuple[int, int]:
 
      Return pair (rows number, colums number).
      """
-def get_frame_size(text):
-    """Calculate size of multiline text fragment. Returns pair (rows number, colums number)"""
-
     lines = text.splitlines()
     rows = len(lines)
     columns = max([len(line) for line in lines])
@@ -116,4 +113,3 @@ def prepare_screen(scr):
         curses.use_default_colors()
         for i in range(0, getattr(curses, 'COLORS')):
             curses.init_pair(i + 1, i, -1)
-
