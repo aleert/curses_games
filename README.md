@@ -44,7 +44,6 @@ well, no asyncio compatible event loop is used).
 
 * `engine.registry.AnimationRegistry` class for registering your animations
 
-* `engine.animation_utils.animate_frames` that i haven't actually tried but it's still there.
 
 * `engine.utils.draw_frames` to draw miltiline string with curses
 
