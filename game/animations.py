@@ -6,14 +6,18 @@ import time
 from itertools import cycle
 from typing import Sequence
 
-from .state import Spaceship
+from .ship_state import Spaceship
 from engine.decorators import delay_animation_frames_in_coro
-from engine.utils import draw_frame, get_frame_size, read_controls
+from engine.utils import draw_frame, get_frames_size, read_controls,\
+    load_frame_from_file
 
 
 # we'll use it to keep track of space, occupied by spaceship,
 # so stars won't blink through it when they change animation
-ship_state = Spaceship(row=0, column=0, row_size=0, col_size=0)
+f1 = './game/assets/animations/rocket_frame_1.txt'
+f2 = './game/assets/animations/rocket_frame_2.txt'
+ship_sizes = get_frames_size([load_frame_from_file(f1), load_frame_from_file(f2)])
+ship_state = Spaceship(row=0, column=0, sizes=ship_sizes, rows=0, cols=0)
 
 
 @delay_animation_frames_in_coro(0.5)
@@ -110,9 +114,9 @@ def get_random_blinks(scr, n=55):
 async def ship(scr, start_row: int, start_column: int,
                frames: Sequence) -> None:
     """Draw ship animation and move it with arrows."""
-    frame_sizes = [get_frame_size(frame) for frame in frames]
-    max_frame_rows = max(frame_sizes, key=lambda frame: frame[0])[0]
-    max_frame_cols = max(frame_sizes, key=lambda frame: frame[1])[1]
+    frame_sizes = get_frames_size(frames)
+    max_frame_rows = len(frame_sizes)
+    max_frame_cols = sum(max(frame_sizes, key=lambda frame: frame[0]+frame[1]))
     max_rows, max_cols = scr.getmaxyx()
 
     ship_state.row, ship_state.col = start_row, start_column

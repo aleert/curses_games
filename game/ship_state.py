@@ -1,5 +1,4 @@
 """Game state."""
-from itertools import product
 
 
 class Spaceship:
@@ -8,17 +7,17 @@ class Spaceship:
 
     Use it to disable stars that are behind spaceship or detect collisions.
     """
-    def __init__(self, row: int, column: int, row_size: int, col_size: int):
+    def __init__(self, row: int, column: int, rows: int, cols: int, sizes: tuple):
         """
         :param row: Start row.
         :param column: Start column.
-        :param max_rows: Total rows occupied.
-        :param max_cols: Total columns occupied.
+        :param sizes: (start, size) tuple for each row as by utils.get_frames_size.
         """
         self.row = row
         self.col = column
-        self.rows = row_size
-        self.cols = col_size
+        self.rows = rows
+        self.cols = cols
+        self.sizes = sizes
         self.occupied_positions = set()
 
     def is_occupied(self, row, column):
@@ -29,25 +28,25 @@ class Spaceship:
         try:
             # use try except instead of hasattr as
             # AttributeError will be risen only at initialization
-            if key in ('row', 'col', 'rows', 'cols'):
+            if key in ('row', 'col'):
                 old_row, old_col = self.row, self.col
-                old_rows, old_cols = self.rows, self.cols
                 new_row = (key == 'row' and value) or old_row
                 new_col = (key == 'col' and value) or old_col
-                new_rows = (key == 'rows' and value) or old_rows
-                new_cols = (key == 'cols' and value) or old_cols
-                self.occupied_positions = set(product(
-                    range(new_row, new_row+new_rows+1),
-                    range(new_col, new_col+new_cols+1))
-                )
+                new_positions = set()
+                for n_line, line in enumerate(self.sizes):
+                    # add positions occupied by n-th line
+                    [new_positions.add((new_row+n_line, new_col+i))
+                     for i in range(1, line[1]+1)]
+                self.occupied_positions = new_positions
                 self.__dict__['row'] = new_row
                 self.__dict__['col'] = new_col
-                self.__dict__['cols'] = new_cols
-                self.__dict__['rows'] = new_rows
             else:
                 super().__setattr__(key, value)
         except AttributeError:
             # __init__ call
             super().__setattr__(key, value)
+
+    def __str__(self):
+        return "Spaceship at row={0}, col={1}".format(self.row, self.col)
 
 
