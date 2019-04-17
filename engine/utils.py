@@ -1,6 +1,7 @@
 """Useful utils for curses."""
 import curses
-from typing import Tuple
+from itertools import zip_longest
+from typing import Tuple, NewType, Iterator, Container, Iterable
 from pathlib import Path
 
 SPACE_KEY_CODE = 32
@@ -77,16 +78,31 @@ def draw_frame(canvas, start_row: int, start_column: int, text: str, negative=Fa
             canvas.addch(row, column, symbol)
 
 
-def get_frame_size(text: str) -> Tuple[int, int]:
+StartPos = NewType('StartPos', int)
+Length = NewType('Length', int)
+
+
+def get_frame_size(text: str) -> Tuple[Tuple[StartPos, Length], ...]:
     """
     Calculate sizes of multiline text fragment.
 
-     Return pair (rows number, colums number).
+     Yields pairs (start_pos, size) for each row.
      """
     lines = text.splitlines()
-    rows = len(lines)
-    columns = max([len(line) for line in lines])
-    return rows, columns
+    start_pos = lambda line: StartPos(len(line) - len(line.lstrip()))
+    size = lambda line: Length(len(line.strip()))
+    sizes = tuple((start_pos(l), size(l)) for l in lines)
+    return sizes
+
+
+def get_frames_size(frames: Iterable[str]) -> Tuple[Tuple[StartPos, Length], ...]:
+    """
+    Return (StartPos, Length) tuple for each row with max Length among frames.
+    """
+    return tuple(max(line, key=lambda x: x[1])
+                 for line in
+                 zip_longest(*(get_frame_size(frame) for frame in frames))
+                 )
 
 
 def load_frame_from_file(path: str) -> str:
