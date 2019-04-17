@@ -1,4 +1,4 @@
-#Cursing games
+# Cursing games
 
 ---
 ## About
