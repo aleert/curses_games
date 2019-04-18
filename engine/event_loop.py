@@ -4,7 +4,7 @@ from typing import Sequence
 
 from .registry import AnimationRegistry
 
-r = AnimationRegistry()
+registry = AnimationRegistry()
 
 
 def run_coros(scr, coroutines: Sequence) -> None:
