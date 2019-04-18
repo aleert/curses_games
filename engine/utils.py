@@ -4,6 +4,7 @@ from itertools import zip_longest
 from typing import Tuple, NewType, Iterator, Container, Iterable
 from pathlib import Path
 
+
 SPACE_KEY_CODE = 32
 LEFT_KEY_CODE = 260
 RIGHT_KEY_CODE = 261
@@ -80,13 +81,20 @@ def draw_frame(canvas, start_row: int, start_column: int, text: str, negative=Fa
 
 StartPos = NewType('StartPos', int)
 Length = NewType('Length', int)
+Row_Nonempty_Symbols = Tuple[StartPos, Length]
 
 
-def get_frame_size(text: str) -> Tuple[Tuple[StartPos, Length], ...]:
+def get_frame_shape(text: str) -> Tuple[Tuple[StartPos, Length], ...]:
     """
     Calculate sizes of multiline text fragment.
 
-     Yields pairs (start_pos, size) for each row.
+     For every nonempty frame line tuple(first_nonempty_char, nonempty_chars_len)
+     calculated.
+     Return tuple with results for every line in frame.
+
+     eg: frame='  *\n * \n***\n'
+     get_frame_shape(frame)
+     will result in ((2,1), (1, 1), (0, 3))
      """
     lines = text.splitlines()
     start_pos = lambda line: StartPos(len(line) - len(line.lstrip()))
@@ -95,14 +103,16 @@ def get_frame_size(text: str) -> Tuple[Tuple[StartPos, Length], ...]:
     return sizes
 
 
-def get_frames_size(frames: Iterable[str]) -> Tuple[Tuple[StartPos, Length], ...]:
+def get_frames_shape(frames: Iterable[str]) -> Tuple[Row_Nonempty_Symbols, ...]:
     """
-    Return (StartPos, Length) tuple for each row with max Length among frames.
+    Return frame shape as in get_frame_shape, but will pick rows with max width among frames.
     """
-    return tuple(max(line, key=lambda x: x[1])
-                 for line in
-                 zip_longest(*(get_frame_size(frame) for frame in frames))
-                 )
+    # tuple of first rows sizes, second rows sizes etc
+    rows_among_frames = zip_longest(*(get_frame_shape(frame) for frame in frames))
+    # get row with maximum length
+    row_with_max_length = lambda row_of_rows: max(row_of_rows, key=lambda row: row[1])
+    return tuple(row_with_max_length(row_of_rows)
+                 for row_of_rows in rows_among_frames)
 
 
 def load_frame_from_file(path: str) -> str:
@@ -115,11 +125,36 @@ def load_frame_from_file(path: str) -> str:
         raise OSError('your file {0} cannot be loaded'.format(path))
 
 
+def set_screen_refresh_mode(scr):
+    """
+    Set screen refresh mode or set default.
+
+    Modes available are 'AUTOUPDATE' or 'FRAME_RATE_CONTROL'
+    with latter updating frames according to FRAME_RATE
+    and former updating screen on each change.
+    """
+    try:
+        from game.prepare_game import FRAME_RATE
+    except ImportError:
+        FRAME_RATE = 30
+    try:
+        from game.prepare_game import REFRESH_MODE
+
+    except ImportError:
+        REFRESH_MODE = 'AUTOUPDATE'
+
+    if REFRESH_MODE == 'AUTOUPDATE':
+        scr.nodelay(True)
+    elif REFRESH_MODE == 'FRAME_RATE_CONTROL':
+        scr.timeout(int(1000/FRAME_RATE))
+    else:
+        raise ValueError('Unknown REFRESH_MODE value {0}'.format(REFRESH_MODE))
+
+
 def prepare_screen(scr):
     """Draw border, make async key input and other prep."""
-    scr.nodelay(True)
+    set_screen_refresh_mode(scr)
     scr.border()
-    scr.refresh()
     curses.curs_set(False)
     curses.update_lines_cols()
     # needed to get black character background for terminals with color support

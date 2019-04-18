@@ -26,3 +26,4 @@ def delay_animation_frames_in_coro(delay: float) -> Callable:
                 await asyncio.sleep(0)
         return _wrapper
     return _delay_animation
+
