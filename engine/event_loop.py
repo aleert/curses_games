@@ -7,14 +7,12 @@ from engine.decorators import delay_animation_frames_in_coro
 from .registry import get_registered_animations, register_animation
 
 
-def run_coros(scr, coroutines: Sequence) -> None:
+def run_coros(scr, animations: Deque) -> None:
     """Run coroutines in roundrobin, removing exhausted ones."""
-    registered_animations: Deque = get_registered_animations()
-    while registered_animations:
+    while animations:
+        coro = animations[0]
         try:
-            coro = registered_animations[0]
             coro.send(None)
-            registered_animations.rotate(1)
-            scr.refresh()
+            animations.rotate(1)
         except StopIteration:
-            registered_animations.remove(coro)
+            animations.remove(coro)

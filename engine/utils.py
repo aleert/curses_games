@@ -118,8 +118,8 @@ def load_frame_from_file(path: str) -> str:
 def prepare_screen(scr):
     """Draw border, make async key input and other prep."""
     scr.nodelay(True)
+    curses.cbreak()
     scr.border()
-    scr.refresh()
     curses.curs_set(False)
     curses.update_lines_cols()
     # needed to get black character background for terminals with color support
