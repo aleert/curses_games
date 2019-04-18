@@ -1,21 +1,14 @@
 """Functions responsible for running corutines."""
-from itertools import cycle, islice
-from typing import Sequence
-
-from .registry import AnimationRegistry
-
-r = AnimationRegistry()
+from typing import Deque
 
 
-def run_coros(scr, coroutines: Sequence) -> None:
+def run_coros(scr, animations: Deque) -> None:
     """Run coroutines in roundrobin, removing exhausted ones."""
-    num_active = len(coroutines)
-    nexts = cycle(coroutines)
-    while num_active:
+    while animations:
+        coro = animations[0]
         try:
-            coro = next(nexts)
             coro.send(None)
-            scr.refresh()
+            animations.rotate(1)
         except StopIteration:
-            num_active -= 1
-            nexts = cycle(islice(nexts, num_active))
+            animations.remove(coro)
+
