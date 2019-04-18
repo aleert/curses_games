@@ -9,21 +9,8 @@ from engine.event_loop import run_coros
 from engine.utils import prepare_screen
 
 
-try:
-    from game.prepare_game import FRAME_RATE
-except ImportError:
-    FRAME_RATE = 30
-
-
-@delay_animation_frames_in_coro(1/FRAME_RATE)
-async def refresh_screen(scr):
-    scr.refresh()
-    await asyncio.sleep(0)
-
-
 def run_animations(scr):
     """Run all registered animations."""
-    register_animation(refresh_screen(scr))
     prepare_animations(scr)
     coros = get_registered_animations()
     run_coros(scr, coros)
@@ -38,3 +25,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+

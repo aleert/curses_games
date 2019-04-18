@@ -42,12 +42,31 @@ that will allow you to specify delay in second for every `await asyncio.sleep(0)
 call in you animation (and you cant specify other timeout than 0 for `asyncio.sleep` because,
 well, no asyncio compatible event loop is used).
 
-* `engine.registry.register_animation` class to register you animations in game.
+* `engine.register_animation` to register you animations in game.
 
+* `engine.register_animation` to register you frames in frame collections.
 
 * `engine.utils.draw_frames` to draw miltiline string with curses
 
 and other helpful functions from `engine.utils`. It's quite tiny so check it out!
+
+
+To load your animation frames from external file and register them do following:
+```python
+from engine.registry import register_frame
+from engine.utils import load_frame_from_file
+
+fr1 = load_frame_from_file('path/to/frame1.txt')
+fr2 = load_frame_from_file('path/to/frame2.txt')
+register_frame('ship_frames', fr1)
+register_frame('ship_frames', fr2)
+```
+You can access your frames later:
+```python
+from engine.registry import get_frames
+
+fr1, fr2 = get_frames('ship_frames')
+```
 
 To regitster you animation do the following in `game.prepare_game`:
 ```python
@@ -59,9 +78,24 @@ def prepare_animations(scr):
     [register_animation(animation) for animation in animations]
 ```
 
-To specify frame rate add `FRAME_RATE={some_integer}` to `game.prepare_game`. If you don't specify it default
-frame rate of 30 frames per seconds will be used.
-
 And after that just run `python main.py` and enjoy.
 
+### On animation update
 
+There are two modes that you can specify in `game.prepare_game`:
+```python
+REFRESH_MODE = 'AUTOUPDATE'
+```
+and
+```python
+REFRESH_MODE = 'FRAME_RATE_CONTROL'
+FRAME_RATE: float = 15
+```
+Use `'FRAME_RATE_CONTROL'` to update screen according with given `FRAME_RATE` (default is 30).
+`'AUTOUPDATE'` updates image on every change made to curses screen object.
+
+`REFRESH_MODE` defaults to `'AUTOUPDATE'`
+note that in `'AUTOUPDATE'` mode `FRAME_RATE` has no effect and only
+ timeouts set with `engine.decorators.delay_animation_frames_in_coro` would be respected
+also note that `'FRAME_RATE_CONTROL'` mode has blocking input so you can't
+hold arrow to move ship but has to do single arrow taps instead.
