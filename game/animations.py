@@ -3,21 +3,17 @@ import asyncio
 import curses
 import random
 import time
-from itertools import cycle
-from typing import Sequence
+from itertools import cycle, chain
 
 from .ship_state import Spaceship
 from engine.decorators import delay_animation_frames_in_coro
-from engine.utils import draw_frame, get_frames_size, read_controls,\
-    load_frame_from_file
+from engine.registry import get_frames
+from engine.utils import draw_frame, get_frames_shape, read_controls
 
 
-# we'll use it to keep track of space, occupied by spaceship,
-# so stars won't blink through it when they change animation
-f1 = './game/assets/animations/rocket_frame_1.txt'
-f2 = './game/assets/animations/rocket_frame_2.txt'
-ship_sizes = get_frames_size([load_frame_from_file(f1), load_frame_from_file(f2)])
-ship_state = Spaceship(row=0, column=0, sizes=ship_sizes, rows=0, cols=0)
+# set it's properties in ship animation so stars will be aware
+# of positions occupied by ship
+ship_state = Spaceship(row=0, column=0, sizes=tuple(), rows=0, cols=0)
 
 
 @delay_animation_frames_in_coro(0.5)
@@ -112,42 +108,59 @@ def get_random_blinks(scr, n=55):
 
 @delay_animation_frames_in_coro(0.1)
 async def ship(scr, start_row: int, start_column: int,
-               frames: Sequence) -> None:
+               frames_name: str) -> None:
     """Draw ship animation and move it with arrows."""
-    frame_sizes = get_frames_size(frames)
+    # set ship state to keep track of positions it occupies
+    frames = get_frames(frames_name)
+    frame_sizes = get_frames_shape(frames)
+    ship_state.sizes = frame_sizes
+
+    # check our ship fits into terminal window
     max_frame_rows = len(frame_sizes)
     max_frame_cols = sum(max(frame_sizes, key=lambda frame: frame[0]+frame[1]))
     max_rows, max_cols = scr.getmaxyx()
-
-    ship_state.row, ship_state.col = start_row, start_column
-    ship_state.rows, ship_state.cols = max_frame_rows, max_frame_cols
 
     if start_row+ship_state.rows >= max_rows \
             or start_column+ship_state.cols >= max_cols:
         raise RuntimeError('Your terminal window is too small for a ship to fit in. '
                            'Please increase your terminal window.')
 
+    # update state if everything is fine
+    ship_state.row, ship_state.col = start_row, start_column
+    ship_state.rows, ship_state.cols = max_frame_rows, max_frame_cols
+
+    # have to start frame_loop outside of for loop as we should change frames inside
     frame_loop = cycle(frames)
-    while True:
+
+    for frame in frame_loop:
         rows_direction, columns_direction, space_pressed = read_controls(scr)
-        frame = next(frame_loop)
+
+        prev_frame = next(frame_loop)
+        draw_frame(scr, start_row, start_column, prev_frame, negative=True)
+        # have to rotate one more time there
+        next(frame_loop)
         draw_frame(scr, start_row, start_column, frame)
         await asyncio.sleep(0)
-        draw_frame(scr, start_row, start_column, frame, negative=True)
 
         if rows_direction:
+            draw_frame(scr, start_row, start_column, frame, negative=True)
             new_row = start_row + rows_direction
 
             start_row = new_row \
                 if 0 < new_row and new_row+max_frame_rows < max_rows \
                 else start_row
             ship_state.row = start_row
+            # redraw to avoid ship flickering
+            draw_frame(scr, start_row, start_column, frame)
 
         if columns_direction:
+            draw_frame(scr, start_row, start_column, frame, negative=True)
             new_col = start_column + columns_direction
 
             start_column = new_col \
                 if 0 < new_col and new_col + max_frame_cols < max_cols \
                 else start_column
             ship_state.col = start_column
+            # redraw to avoid ship flickering
+            draw_frame(scr, start_row, start_column, frame)
 
