@@ -59,6 +59,9 @@ def prepare_animations(scr):
     [register_animation(animation) for animation in animations]
 ```
 
+To specify frame rate add `FRAME_RATE={some_integer}` to `game.prepare_game`. If you don't specify it default
+frame rate of 30 frames per seconds will be used.
+
 And after that just run `python main.py` and enjoy.
 
 

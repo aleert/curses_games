@@ -1,9 +1,10 @@
 """Functions responsible for running corutines."""
+import asyncio
 from itertools import cycle, islice
 from typing import Sequence, Deque
 
-from .registry import get_registered_animations
-
+from engine.decorators import delay_animation_frames_in_coro
+from .registry import get_registered_animations, register_animation
 
 
 def run_coros(scr, coroutines: Sequence) -> None:
