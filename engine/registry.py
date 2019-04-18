@@ -1,20 +1,17 @@
 """Registries that keep all global items such as animations."""
-from typing import Coroutine
+from collections import deque
+from typing import Coroutine, Deque
+
+_registry = deque()
 
 
-class AnimationRegistry:
-    """Class that allow to register animations to global registry and retrieve them."""
+def register_animation(new_animation: Coroutine):
+    """Add new animation to registry."""
+    _registry.append(new_animation)
+    return new_animation
 
-    _registry = []
 
-    @property
-    def registered(self):
-        """Return copy of all registered animations."""
-        return list(self._registry)
-
-    @classmethod
-    def register(cls, new_animation: Coroutine):
-        """Add new animation to registry."""
-        cls._registry.append(new_animation)
-        return new_animation
+def get_registered_animations() -> Deque[Coroutine]:
+    """Return deque with all animations."""
+    return _registry
 

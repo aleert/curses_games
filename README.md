@@ -42,7 +42,7 @@ that will allow you to specify delay in second for every `await asyncio.sleep(0)
 call in you animation (and you cant specify other timeout than 0 for `asyncio.sleep` because,
 well, no asyncio compatible event loop is used).
 
-* `engine.registry.AnimationRegistry` class for registering your animations
+* `engine.registry.register_animation` class to register you animations in game.
 
 
 * `engine.utils.draw_frames` to draw miltiline string with curses
@@ -51,12 +51,12 @@ and other helpful functions from `engine.utils`. It's quite tiny so check it out
 
 To regitster you animation do the following in `game.prepare_game`:
 ```python
-r = AnimationRegistry()
+from engine.registry import register_animation
 
 
 def prepare_animations(scr):
     animations = list(generate_animations(scr=scr, n=50))
-    [r.register(animation) for animation in animations]
+    [register_animation(animation) for animation in animations]
 ```
 
 And after that just run `python main.py` and enjoy.
