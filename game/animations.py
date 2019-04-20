@@ -3,7 +3,7 @@ import asyncio
 import curses
 import random
 import time
-from itertools import cycle, chain
+from itertools import cycle
 
 from .ship_state import Spaceship
 from engine.decorators import delay_animation_frames_in_coro
