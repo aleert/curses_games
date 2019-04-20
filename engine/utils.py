@@ -1,7 +1,7 @@
 """Useful utils for curses."""
 import curses
 from itertools import zip_longest
-from typing import Tuple, NewType, Iterable
+from typing import Tuple, NewType, Iterator, Container, Iterable
 from pathlib import Path
 
 
