@@ -1,6 +1,6 @@
 """Registries that keep all global items such as animations and frames."""
-from collections import deque, defaultdict
-from typing import Coroutine, Deque, List
+from collections import defaultdict
+from typing import Coroutine, List
 
 _registry = list()
 
