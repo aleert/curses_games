@@ -9,7 +9,7 @@ from game.animations import fire, get_random_blinks, ship
 
 
 # default FRAME_RATE is 50
-# FRAME_RATE = 15
+# FRAME_RATE: float = 15
 
 
 def prepare_frames():
