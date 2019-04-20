@@ -125,36 +125,10 @@ def load_frame_from_file(path: str) -> str:
         raise OSError('your file {0} cannot be loaded'.format(path))
 
 
-def set_screen_refresh_mode(scr):
-    """
-    Set screen refresh mode or set default.
-
-    Modes available are 'AUTOUPDATE' or 'FRAME_RATE_CONTROL'
-    with latter updating frames according to FRAME_RATE
-    and former updating screen on each change.
-    """
-    try:
-        from game.prepare_game import FRAME_RATE
-    except ImportError:
-        FRAME_RATE = 30
-    try:
-        from game.prepare_game import REFRESH_MODE
-
-    except ImportError:
-        REFRESH_MODE = 'AUTOUPDATE'
-
-    if REFRESH_MODE == 'AUTOUPDATE':
-        scr.nodelay(True)
-    elif REFRESH_MODE == 'FRAME_RATE_CONTROL':
-        scr.timeout(int(1000/FRAME_RATE))
-    else:
-        raise ValueError('Unknown REFRESH_MODE value {0}'.format(REFRESH_MODE))
-
-
 def prepare_screen(scr):
     """Draw border, make async key input and other prep."""
-    set_screen_refresh_mode(scr)
     scr.border()
+    scr.nodelay(True)
     curses.curs_set(False)
     curses.update_lines_cols()
     # needed to get black character background for terminals with color support

@@ -2,7 +2,7 @@
 from collections import deque, defaultdict
 from typing import Coroutine, Deque, List
 
-_registry = deque()
+_registry = list()
 
 
 _animation_frame_registry = defaultdict(list)
@@ -14,9 +14,9 @@ def register_animation(new_animation: Coroutine):
     return new_animation
 
 
-def get_registered_animations() -> Deque[Coroutine]:
+def get_registered_animations() -> List[Coroutine]:
     """Return deque with all animations."""
-    return _registry
+    return list(_registry)
 
 
 def register_frame(name: str, frame: str) -> None:

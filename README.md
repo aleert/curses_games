@@ -80,22 +80,10 @@ def prepare_animations(scr):
 
 And after that just run `python main.py` and enjoy.
 
-### On animation update
+### Controlling frame rate.
 
-There are two modes that you can specify in `game.prepare_game`:
+You can specify screen update frequency by setting `FRAME_RATE` in `game.prepare_game`:
 ```python
-REFRESH_MODE = 'AUTOUPDATE'
-```
-and
-```python
-REFRESH_MODE = 'FRAME_RATE_CONTROL'
 FRAME_RATE: float = 15
 ```
-Use `'FRAME_RATE_CONTROL'` to update screen according with given `FRAME_RATE` (default is 30).
-`'AUTOUPDATE'` updates image on every change made to curses screen object.
-
-`REFRESH_MODE` defaults to `'AUTOUPDATE'`
-note that in `'AUTOUPDATE'` mode `FRAME_RATE` has no effect and only
- timeouts set with `engine.decorators.delay_animation_frames_in_coro` would be respected
-also note that `'FRAME_RATE_CONTROL'` mode has blocking input so you can't
-hold arrow to move ship but has to do single arrow taps instead.
+If not specified, `FRAME_RATE` defaults to 50.

@@ -1,14 +1,23 @@
 """Functions responsible for running corutines."""
-from typing import Deque
+import time
+from typing import List, Coroutine
 
 
-def run_coros(scr, animations: Deque) -> None:
+try:
+    from game.prepare_game import FRAME_RATE
+except ImportError:
+    FRAME_RATE = 50
+
+
+def run_coros(animations: List[Coroutine]) -> None:
     """Run coroutines in roundrobin, removing exhausted ones."""
     while animations:
-        coro = animations[0]
-        try:
-            coro.send(None)
-            animations.rotate(1)
-        except StopIteration:
-            animations.remove(coro)
+        for animation in animations:
+            try:
+                animation.send(None)
+            except StopIteration:
+                animations.remove(animation)
+
+        time.sleep(1/FRAME_RATE)
+
 
