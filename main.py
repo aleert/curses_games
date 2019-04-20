@@ -1,10 +1,8 @@
 """Run your game with python main.py."""
-import asyncio
 import curses
 
-from engine.decorators import delay_animation_frames_in_coro
 from game.prepare_game import prepare_animations
-from engine.registry import get_registered_animations, register_animation
+from engine.registry import get_registered_animations
 from engine.event_loop import run_coros
 from engine.utils import prepare_screen
 
@@ -13,7 +11,7 @@ def run_animations(scr):
     """Run all registered animations."""
     prepare_animations(scr)
     coros = get_registered_animations()
-    run_coros(scr, coros)
+    run_coros(coros)
 
 
 def main():
