@@ -7,11 +7,17 @@ from engine.event_loop import run_coros
 from engine.utils import prepare_screen
 
 
+try:
+    from game.prepare_game import FRAME_RATE
+except ImportError:
+    FRAME_RATE = 50
+
+
 def run_animations(scr):
     """Run all registered animations."""
     prepare_animations(scr)
     coros = get_registered_animations()
-    run_coros(coros)
+    run_coros(coros, FRAME_RATE)
 
 
 def main():

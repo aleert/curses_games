@@ -3,13 +3,7 @@ import time
 from typing import List, Coroutine
 
 
-try:
-    from game.prepare_game import FRAME_RATE
-except ImportError:
-    FRAME_RATE = 50
-
-
-def run_coros(animations: List[Coroutine]) -> None:
+def run_coros(animations: List[Coroutine], frame_rate: float = 50) -> None:
     """Run coroutines in roundrobin, removing exhausted ones."""
     while animations:
         for animation in animations:
@@ -18,6 +12,6 @@ def run_coros(animations: List[Coroutine]) -> None:
             except StopIteration:
                 animations.remove(animation)
 
-        time.sleep(1/FRAME_RATE)
+        time.sleep(1/frame_rate)
 
 
