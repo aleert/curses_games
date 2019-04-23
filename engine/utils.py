@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
 
 """Useful utils for curses."""
+import asyncio
 import curses
 from itertools import zip_longest
 from pathlib import Path
 from typing import Iterable, NewType, Tuple
+
+from engine.registry import FRAME_RATE
 
 SPACE_KEY_CODE = 32
 LEFT_KEY_CODE = 260
@@ -94,19 +97,25 @@ def get_frame_shape(text: str) -> Tuple[Tuple[StartPos, Length], ...]:
     """
     Calculate sizes of multiline text fragment.
 
-     For every nonempty frame line tuple(first_nonempty_char, nonempty_chars_len)
-     calculated.
-     Return tuple with results for every line in frame.
+    For every nonempty frame line tuple(first_nonempty_char, nonempty_chars_len)
+    calculated.
+    Return tuple with results for every line in frame.
 
-     eg: frame='  *\n * \n***\n'
-     get_frame_shape(frame)
-     will result in ((2,1), (1, 1), (0, 3))
-     """
+    eg: frame='  *\n * \n***\n'
+    get_frame_shape(frame)
+    will result in ((2,1), (1, 1), (0, 3))
+    """
     lines = text.splitlines()
     start_pos = lambda line: StartPos(len(line) - len(line.lstrip()))  # noqa: E731, Z221
     size = lambda line: Length(len(line.strip()))  # noqa: E731
     sizes = tuple((start_pos(line), size(line)) for line in lines)
     return sizes
+
+
+async def delay(seconds: float) -> None:
+    """Awaits asyncio.sleep(0) till specified number of seconds passes."""
+    for _ in range(int(seconds*FRAME_RATE)):
+        await asyncio.sleep(0)
 
 
 def get_frames_shape(frames: Iterable[str]) -> Tuple[Row_Nonempty_Symbols, ...]:
@@ -117,9 +126,9 @@ def get_frames_shape(frames: Iterable[str]) -> Tuple[Row_Nonempty_Symbols, ...]:
     rows_among_frames = zip_longest(*(get_frame_shape(frame) for frame in frames))
     # get row with maximum length
     row_with_max_length = lambda row_of_rows: max(row_of_rows, key=lambda row: row[1])  # noqa: E731
-    return tuple(row_with_max_length(row_of_rows)
-                 for row_of_rows in rows_among_frames
-                 )
+    return tuple(
+        row_with_max_length(row_of_rows) for row_of_rows in rows_among_frames
+           )
 
 
 def load_frame_from_file(path: str) -> str:
