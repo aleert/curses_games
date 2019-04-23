@@ -9,7 +9,7 @@ from engine.registry import animation_registry, register_frame
 from engine.utils import load_frame_from_file
 from game.animations import fire, get_random_blinks, ship
 
-# default FRAME_RATE is 50
+# default FRAME_RATE is 30
 # FRAME_RATE: float = 15
 
 
@@ -29,7 +29,7 @@ def prepare_animations(scr) -> None:
     center_col, center_row = max_x // 2, max_y // 2
 
     # stars
-    [animation_registry.append(blink) for blink in get_random_blinks(scr, n=130)]
+    [animation_registry.append(blink) for blink in get_random_blinks(scr, n_blinks=130)]
 
     # shot
     animation_registry.append(fire(

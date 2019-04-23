@@ -37,14 +37,8 @@ registering all of your animations.
 
 Your helpers will be:
  
- * `engine.decorators.delay_animation_frame_in_coros(delay)`,
-that will allow you to specify delay in second for every `await asyncio.sleep(0)`
-call in you animation (and you cant specify other timeout than 0 for `asyncio.sleep` because,
-well, no asyncio compatible event loop is used).
-
-* `engine.register_animation` to register you animations in game.
-
-* `engine.register_animation` to register you frames in frame collections.
+ * `engine.utils.delay(delay_seconds)`,
+that will allow you to specify delay in seconds inside your animations.
 
 * `engine.utils.draw_frames` to draw miltiline string with curses
 
@@ -70,12 +64,12 @@ fr1, fr2 = get_frames('ship_frames')
 
 To regitster you animation do the following in `game.prepare_game`:
 ```python
-from engine.registry import register_animation
+from engine.registry import animation_registry
 
 
 def prepare_animations(scr):
     animations = list(generate_animations(scr=scr, n=50))
-    [register_animation(animation) for animation in animations]
+    [animation_registry.append(animation) for animation in animations]
 ```
 
 And after that just run `python main.py` and enjoy.
@@ -86,4 +80,4 @@ You can specify screen update frequency by setting `FRAME_RATE` in `game.prepare
 ```python
 FRAME_RATE: float = 15
 ```
-If not specified, `FRAME_RATE` defaults to 50.
+If not specified, `FRAME_RATE` defaults to 30.

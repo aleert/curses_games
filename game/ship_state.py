@@ -1,14 +1,19 @@
-"""Game state."""
+# -*- coding: utf-8 -*-
+
+"""Class to keep track of spaceship position."""
 
 
-class Spaceship:
+class Spaceship(object):
     """
     Spaceship state.
 
     Use it to disable stars that are behind spaceship or detect collisions.
     """
-    def __init__(self, row: int, column: int, rows: int, cols: int, sizes: tuple):
+
+    def __init__(self, row: int, column: int, rows: int, cols: int, sizes: tuple):  # noqa: Z211
         """
+        New ship of given size and at given position.
+
         :param row: Start row.
         :param column: Start column.
         :param sizes: (start, size) tuple for each row as by utils.get_frame_shape.
@@ -20,10 +25,7 @@ class Spaceship:
         self.sizes = sizes
         self.occupied_positions = set()
 
-    def is_occupied(self, row, column):
-        return (row, column) in self.occupied_positions
-
-    def __setattr__(self, key, value):
+    def __setattr__(self, key, value):  # noqa: Z110, Z210
         """Update occupied positions on every position update or sizes update."""
         try:
             # use try except instead of hasattr as
@@ -36,8 +38,8 @@ class Spaceship:
                 new_positions = set()
                 for n_line, line in enumerate(self.sizes):
                     # add positions occupied by n-th line
-                    [new_positions.add((new_row+n_line, new_col+i))
-                     for i in range(1, line[1]+1)]
+                    [new_positions.add((new_row + n_line, new_col + shift))
+                     for shift in range(1, line[1] + 1)]  # noqa: Z319
                 self.occupied_positions = new_positions
                 self.__dict__['row'] = new_row
                 self.__dict__['col'] = new_col
@@ -50,4 +52,5 @@ class Spaceship:
             super().__setattr__(key, value)
 
     def __str__(self):
-        return "Spaceship at row={0}, col={1}".format(self.row, self.col)
+        """Position of spaceship."""
+        return 'Spaceship at row={0}, col={1}'.format(self.row, self.col)

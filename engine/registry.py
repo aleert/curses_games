@@ -7,7 +7,7 @@ from typing import Coroutine, List
 try:
     from game.prepare_game import FRAME_RATE  # noqa: Z435
 except ImportError:
-    FRAME_RATE = 50
+    FRAME_RATE = 30
 
 animation_registry: List[Coroutine] = []
 
