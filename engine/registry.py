@@ -4,21 +4,15 @@
 from collections import defaultdict
 from typing import Coroutine, List
 
-_registry = []
+try:
+    from game.prepare_game import FRAME_RATE  # noqa: Z435
+except ImportError:
+    FRAME_RATE = 50
+
+animation_registry: List[Coroutine] = []
 
 
 _animation_frame_registry = defaultdict(list)
-
-
-def register_animation(new_animation: Coroutine):
-    """Add new animation to registry."""
-    _registry.append(new_animation)
-    return new_animation
-
-
-def get_registered_animations() -> List[Coroutine]:
-    """Return deque with all animations."""
-    return list(_registry)
 
 
 def register_frame(name: str, frame: str) -> None:

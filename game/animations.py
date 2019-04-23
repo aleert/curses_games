@@ -5,11 +5,11 @@ import random
 import time
 from itertools import cycle
 
-from .ship_state import Spaceship
 from engine.decorators import delay_animation_frames_in_coro
 from engine.registry import get_frames
 from engine.utils import draw_frame, get_frames_shape, read_controls
 
+from .ship_state import Spaceship
 
 # set it's properties in ship animation so stars will be aware
 # of positions occupied by ship
@@ -163,4 +163,3 @@ async def ship(scr, start_row: int, start_column: int,
             ship_state.col = start_column
             # redraw to avoid ship flickering
             draw_frame(scr, start_row, start_column, frame)
-

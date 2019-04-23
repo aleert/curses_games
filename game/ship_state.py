@@ -51,4 +51,3 @@ class Spaceship:
 
     def __str__(self):
         return "Spaceship at row={0}, col={1}".format(self.row, self.col)
-
