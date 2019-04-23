@@ -1,6 +1,8 @@
+# -*- coding: utf-8 -*-
+
 """Functions responsible for running corutines."""
 import time
-from typing import List, Coroutine
+from typing import Coroutine, List
 
 
 def run_coros(animations: List[Coroutine], frame_rate: float = 50) -> None:
@@ -13,5 +15,3 @@ def run_coros(animations: List[Coroutine], frame_rate: float = 50) -> None:
                 animations.remove(animation)
 
         time.sleep(1/frame_rate)
-
-

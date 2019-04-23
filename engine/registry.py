@@ -1,8 +1,10 @@
+# -*- coding: utf-8 -*-
+
 """Registries that keep all global items such as animations and frames."""
 from collections import defaultdict
 from typing import Coroutine, List
 
-_registry = list()
+_registry = []
 
 
 _animation_frame_registry = defaultdict(list)
@@ -27,4 +29,3 @@ def register_frame(name: str, frame: str) -> None:
 def get_frames(name: str) -> List[str]:
     """Get all frames registered for given `name`."""
     return list(_animation_frame_registry[name])
-

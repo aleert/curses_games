@@ -1,0 +1,12 @@
+[flake8]
+max-complexity = 6
+max-line-length = 100
+enable-extensions = G
+# Allow magic numbers in prepare_game
+game/prepare_game.py: Z432
+
+[isort]
+multi_line_output = 3
+include_trailing_comma = true
+default_section = FIRSTPARTY
+line_length = 100
