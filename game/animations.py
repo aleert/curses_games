@@ -46,6 +46,9 @@ async def blink(scr, row: int, column: int, symbol: str = '*') -> None:  # noqa:
     """Display blinking `symbol`."""
     flicker = random.random() * 5
 
+    scr.addstr(row, column, symbol, curses.A_DIM)
+    await delay(flicker)
+
     while True:
         # stars shouldn't blink through our ship
         if (row, column) in ship_state.occupied_positions:
@@ -53,7 +56,7 @@ async def blink(scr, row: int, column: int, symbol: str = '*') -> None:  # noqa:
             continue
 
         scr.addstr(row, column, symbol, curses.A_DIM)
-        await delay(2 + flicker)
+        await delay(2)
 
         scr.addstr(row, column, symbol)
         await delay(0.3)  # noqa: Z432
@@ -62,7 +65,7 @@ async def blink(scr, row: int, column: int, symbol: str = '*') -> None:  # noqa:
         await delay(0.5)
 
         scr.addstr(row, column, symbol)
-        await delay(0.5)
+        await delay(0.3)
 
 
 def get_random_blinks(scr, n_blinks=55):  # noqa: Z210
