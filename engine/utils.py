@@ -1,9 +1,13 @@
+# -*- coding: utf-8 -*-
+
 """Useful utils for curses."""
+import asyncio
 import curses
 from itertools import zip_longest
-from typing import Tuple, NewType, Iterator, Container, Iterable
 from pathlib import Path
+from typing import Iterable, NewType, Tuple
 
+from engine.registry import FRAME_RATE
 
 SPACE_KEY_CODE = 32
 LEFT_KEY_CODE = 260
@@ -12,14 +16,14 @@ UP_KEY_CODE = 259
 DOWN_KEY_CODE = 258
 
 
-def read_controls(canvas):
-    """Read keys pressed and returns tuple witl controls state."""
-
-    rows_direction = columns_direction = 0
+def read_controls(scr) -> Tuple[int, int, bool]:  # noqa C901
+    """Read keys pressed and returns tuple with controls state."""
+    rows_direction = 0
+    columns_direction = 0
     space_pressed = False
 
     while True:
-        pressed_key_code = canvas.getch()
+        pressed_key_code = scr.getch()
 
         if pressed_key_code == -1:
             # https://docs.python.org/3/library/curses.html#curses.window.getch
@@ -43,14 +47,19 @@ def read_controls(canvas):
     return rows_direction, columns_direction, space_pressed
 
 
-def draw_frame(canvas, start_row: int, start_column: int, text: str, negative=False):
+def draw_frame(  # noqa: C901, Z210
+    scr,
+    start_row: int,
+    start_column: int,
+    text: str,
+    negative: bool = False,
+) -> None:
     """
-    Draw multiline text fragment on canvas.
+    Draw multiline text fragment on scr.
 
-     Erase text instead of drawing if negative=True is specified.
-     """
-
-    rows_number, columns_number = canvas.getmaxyx()
+    Erase text instead of drawing if negative=True is specified.
+    """
+    rows_number, columns_number = scr.getmaxyx()
 
     for row, line in enumerate(text.splitlines(), round(start_row)):
         if row < 0:
@@ -76,7 +85,7 @@ def draw_frame(canvas, start_row: int, start_column: int, text: str, negative=Fa
                 continue
 
             symbol = symbol if not negative else ' '
-            canvas.addch(row, column, symbol)
+            scr.addch(row, column, symbol)
 
 
 StartPos = NewType('StartPos', int)
@@ -88,19 +97,25 @@ def get_frame_shape(text: str) -> Tuple[Tuple[StartPos, Length], ...]:
     """
     Calculate sizes of multiline text fragment.
 
-     For every nonempty frame line tuple(first_nonempty_char, nonempty_chars_len)
-     calculated.
-     Return tuple with results for every line in frame.
+    For every nonempty frame line tuple(first_nonempty_char, nonempty_chars_len)
+    calculated.
+    Return tuple with results for every line in frame.
 
-     eg: frame='  *\n * \n***\n'
-     get_frame_shape(frame)
-     will result in ((2,1), (1, 1), (0, 3))
-     """
+    eg: frame='  *\n * \n***\n'
+    get_frame_shape(frame)
+    will result in ((2,1), (1, 1), (0, 3))
+    """
     lines = text.splitlines()
-    start_pos = lambda line: StartPos(len(line) - len(line.lstrip()))
-    size = lambda line: Length(len(line.strip()))
-    sizes = tuple((start_pos(l), size(l)) for l in lines)
+    start_pos = lambda line: StartPos(len(line) - len(line.lstrip()))  # noqa: E731, Z221
+    size = lambda line: Length(len(line.strip()))  # noqa: E731
+    sizes = tuple((start_pos(line), size(line)) for line in lines)
     return sizes
+
+
+async def delay(seconds: float) -> None:
+    """Awaits asyncio.sleep(0) till specified number of seconds passes."""
+    for _ in range(int(seconds*FRAME_RATE)):
+        await asyncio.sleep(0)
 
 
 def get_frames_shape(frames: Iterable[str]) -> Tuple[Row_Nonempty_Symbols, ...]:
@@ -110,16 +125,17 @@ def get_frames_shape(frames: Iterable[str]) -> Tuple[Row_Nonempty_Symbols, ...]:
     # tuple of first rows sizes, second rows sizes etc
     rows_among_frames = zip_longest(*(get_frame_shape(frame) for frame in frames))
     # get row with maximum length
-    row_with_max_length = lambda row_of_rows: max(row_of_rows, key=lambda row: row[1])
-    return tuple(row_with_max_length(row_of_rows)
-                 for row_of_rows in rows_among_frames)
+    row_with_max_length = lambda row_of_rows: max(row_of_rows, key=lambda row: row[1])  # noqa: E731
+    return tuple(
+        row_with_max_length(row_of_rows) for row_of_rows in rows_among_frames
+           )
 
 
 def load_frame_from_file(path: str) -> str:
     """Load multiline frame from a text file."""
     try:
-        file = Path(path)
-        frame = file.read_text()
+        frame_file = Path(path)
+        frame = frame_file.read_text()
         return frame
     except OSError:
         raise OSError('your file {0} cannot be loaded'.format(path))
@@ -128,14 +144,13 @@ def load_frame_from_file(path: str) -> str:
 def prepare_screen(scr):
     """Draw border, make async key input and other prep."""
     scr.border()
-    scr.nodelay(True)
-    curses.curs_set(False)
+    scr.nodelay(True)  # noqa: Z425
+    curses.curs_set(False)  # noqa: Z425
     curses.update_lines_cols()
     # needed to get black character background for terminals with color support
     # https://stackoverflow.com/questions/18551558/how-to-use-terminal-color-palette-with-curses
     if curses.can_change_color():
         curses.start_color()
         curses.use_default_colors()
-        for i in range(0, getattr(curses, 'COLORS')):
-            curses.init_pair(i + 1, i, -1)
-
+        for color in range(0, getattr(curses, 'COLORS')):
+            curses.init_pair(color + 1, color, -1)
